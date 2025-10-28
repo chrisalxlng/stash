@@ -1,0 +1,18 @@
+{
+	"Log output": {
+		"scope": "javascript, typescript, javascriptreact, typescriptreact",
+		"prefix": "clg",
+		"body": [
+			"console.log(\"$1\");",
+		],
+		"description": "Log some output to console"
+	},
+  "Log value": {
+		"scope": "javascript, typescript, javascriptreact, typescriptreact",
+		"prefix": "clgv",
+		"body": [
+			"console.log(\"$1\", $1);",
+		],
+		"description": "Log a value to console"
+	}
+}

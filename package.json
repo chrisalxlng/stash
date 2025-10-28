@@ -1,0 +1,45 @@
+{
+	"name": "clhub-storage",
+	"version": "1.0.0",
+	"main": "dist/server.js",
+	"scripts": {
+		"dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+		"build": "tsc",
+		"start": "node dist/server.js",
+		"ci": "biome ci src",
+		"fix": "biome check --write src",
+		"format": "biome format src",
+		"lint": "biome lint src",
+		"test": "vitest run"
+	},
+	"engines": {
+		"node": ">=20.0.0"
+	},
+	"author": "Christopher Lang <65340138+chrisalxlng@users.noreply.github.com>",
+	"license": "ISC",
+	"dependencies": {
+		"cors": "^2.8.5",
+		"dotenv": "^17.2.3",
+		"express": "^5.1.0",
+		"express-jwt": "^8.5.1",
+		"jwks-rsa": "^3.2.0",
+		"multer": "^2.0.2",
+		"swagger-jsdoc": "^6.2.8",
+		"swagger-ui-express": "^5.0.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.2",
+		"@types/cors": "^2.8.19",
+		"@types/express": "^5.0.5",
+		"@types/express-jwt": "^6.0.4",
+		"@types/multer": "^2.0.0",
+		"@types/node": "^24.9.2",
+		"@types/supertest": "^6.0.3",
+		"@types/swagger-ui-express": "^4.1.8",
+		"supertest": "^7.1.4",
+		"ts-node": "^10.9.2",
+		"ts-node-dev": "^2.0.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.6"
+	}
+}
