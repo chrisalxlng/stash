@@ -101,69 +101,6 @@ export const createFilesRouter = (filesDirectory: string) => {
 	 *           application/json:
 	 *             schema:
 	 *               $ref: '#/components/schemas/FILE_NOT_FOUND'
-	 *
-	 * components:
-	 *   schemas:
-	 *     NO_FILE_PROVIDED:
-	 *       type: object
-	 *       properties:
-	 *         error:
-	 *           type: object
-	 *           properties:
-	 *             code:
-	 *               type: string
-	 *               example: NO_FILE_PROVIDED
-	 *             message:
-	 *               type: string
-	 *               example: Missing file in payload
-	 *             status:
-	 *               type: integer
-	 *               example: 400
-	 *     MISSING_OR_INVALID_TOKEN:
-	 *       type: object
-	 *       properties:
-	 *         error:
-	 *           type: object
-	 *           properties:
-	 *             code:
-	 *               type: string
-	 *               example: MISSING_OR_INVALID_TOKEN
-	 *             message:
-	 *               type: string
-	 *               example: Missing or invalid token
-	 *             status:
-	 *               type: integer
-	 *               example: 401
-	 *     NO_USER_INFO_IN_TOKEN:
-	 *       type: object
-	 *       properties:
-	 *         error:
-	 *           type: object
-	 *           properties:
-	 *             code:
-	 *               type: string
-	 *               example: NO_USER_INFO_IN_TOKEN
-	 *             message:
-	 *               type: string
-	 *               example: Missing user information in token
-	 *             status:
-	 *               type: integer
-	 *               example: 401
-	 *     FILE_NOT_FOUND:
-	 *       type: object
-	 *       properties:
-	 *         error:
-	 *           type: object
-	 *           properties:
-	 *             code:
-	 *               type: string
-	 *               example: FILE_NOT_FOUND
-	 *             message:
-	 *               type: string
-	 *               example: File not found
-	 *             status:
-	 *               type: integer
-	 *               example: 404
 	 */
 	filesRouter.get(
 		"/:fileId",
