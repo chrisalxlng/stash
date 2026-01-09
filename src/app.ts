@@ -11,20 +11,25 @@ export const createApp = (filesDirectory: string) => {
 	const allowedOrigins =
 		process.env.CLHUB_STORAGE_ALLOWED_ORIGINS?.split(",") ?? [];
 
-	app.use(
-		cors({
-			origin: (origin, callback) => {
-				if (!origin || allowedOrigins.includes(origin)) {
-					callback(null, true);
-				} else {
-					callback(new Error("Not allowed by CORS"));
-				}
-			},
-			credentials: true,
-		}),
-	);
+	const corsMiddleware = cors({
+		origin: (origin, callback) => {
+			if (!origin || allowedOrigins.includes(origin)) {
+				callback(null, true);
+			} else {
+				callback(new Error("Not allowed by CORS"));
+			}
+		},
+		credentials: true,
+		allowedHeaders: [
+			"Content-Type",
+			"Authorization",
+			"x-allow-token-access",
+			"x-file-access-token",
+		],
+	});
 
-	app.options(/.*/, cors());
+	app.use(corsMiddleware);
+	app.options(/.*/, corsMiddleware);
 
 	app.use(express.json());
 

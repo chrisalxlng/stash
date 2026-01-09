@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import multer from "multer";
+import type { FileMetadata } from "../types/FileMetadata";
 
 export const createStorage = (filesDirectory: string) => {
 	if (!fs.existsSync(filesDirectory)) {
@@ -36,11 +37,14 @@ export const createStorage = (filesDirectory: string) => {
 				`${fileId}.json`,
 			);
 
-			const metadata = {
+			const allowTokenAccess = req.get("x-allow-token-access") === "true";
+
+			const metadata: FileMetadata = {
 				fileId,
 				originalName: file.originalname,
 				mimetype: file.mimetype,
 				uploadedAt: new Date().toISOString(),
+				allowTokenAccess,
 			};
 
 			fs.writeFileSync(metaPath, JSON.stringify(metadata, null, 2));

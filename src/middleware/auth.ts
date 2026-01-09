@@ -29,4 +29,5 @@ export const authenticate = jwt({
 	audience: keycloakAudience,
 	issuer: `${keycloakIssuerRealmUrl}`,
 	algorithms: ["RS256"],
+	credentialsRequired: false,
 });

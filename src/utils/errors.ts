@@ -17,6 +17,14 @@ export const ERRORS = {
 		message: "File not found",
 		status: 404,
 	},
+	FILE_METADATA_NOT_FOUND: {
+		message: "File metadata not found",
+		status: 404,
+	},
+	FILE_ACCESS_NOT_ALLOWED: {
+		message: "File cannot be accessed with the provided credentials or token",
+		status: 403,
+	},
 	INTERNAL_SERVER_ERROR: {
 		message: "An unexpected error occurred",
 		status: 500,

@@ -30,10 +30,12 @@ npm install
 Specify environment variables, e.g.:
 
 ```bash
-KEYCLOAK_DOMAIN=https://auth.example.com
 KEYCLOAK_APPS_REALM=apps
-KEYCLOAK_AUDIENCE=example-audience
-ALLOWED_ORIGINS=https://demo1.example.com,https://demo2.example.com
+CLHUB_STORAGE_KEYCLOAK_ISSUER_URL=https://auth.example.com
+CLHUB_STORAGE_KEYCLOAK_JWKS_URL=https://auth.example.com
+CLHUB_STORAGE_KEYCLOAK_AUDIENCE=example-audience
+CLHUB_STORAGE_ALLOWED_ORIGINS=https://demo1.example.com,https://demo2.example.com
+CLHUB_STORAGE_FILE_ACCESS_SECRET=secret
 ```
 
 Run the server:
