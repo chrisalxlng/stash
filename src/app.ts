@@ -28,7 +28,12 @@ export const createApp = (filesDirectory: string) => {
 
 	app.use(express.json());
 
-	setupSwagger(app);
+	setupSwagger(app, {
+		route: "/docs/v1",
+		version: "v1",
+		apiGlobs: ["./src/routes/v1/**/*.ts"],
+		serverUrl: "/v1",
+	});
 
 	app.use(authenticate);
 

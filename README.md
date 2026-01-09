@@ -51,3 +51,7 @@ The project uses Vitest and Supertest for end-to-end (e2e) tests.
 ```bash
 npm test
 ```
+
+## 📄 Docs
+
+Swagger docs are availabe at `/docs/<VERSION>`, e.g. `/docs/v1`.
