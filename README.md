@@ -1,4 +1,4 @@
-# 🗂️ clhub-storage
+# 🗂️ Stash
 
 A lightweight Node.js + Express service for uploading, retrieving, and deleting user-specific files.
 Each file is stored under a user- and client-specific directory, along with metadata (e.g. original name, upload date, MIME type).
@@ -17,26 +17,17 @@ files/{userId}/{clientId}/{fileId}
 files/{userId}/{clientId}/{fileId}.json
 ```
 
-## ⚙️ Setup
+## ⚙️ Development Setup
 
 ```bash
-git clone https://github.com/chrisalxlng/clhub-storage.git
+git clone https://github.com/chrisalxlng/stash.git
 
-cd clhub-storage
+cd stash
 
 npm install
 ```
 
-Specify environment variables, e.g.:
-
-```bash
-KEYCLOAK_APPS_REALM=apps
-CLHUB_STORAGE_KEYCLOAK_ISSUER_URL=https://auth.example.com
-CLHUB_STORAGE_KEYCLOAK_JWKS_URL=https://auth.example.com
-CLHUB_STORAGE_KEYCLOAK_AUDIENCE=example-audience
-CLHUB_STORAGE_ALLOWED_ORIGINS=https://demo1.example.com,https://demo2.example.com
-CLHUB_STORAGE_FILE_ACCESS_SECRET=secret
-```
+Adjust environment variables in [.env.development](./.env.development).
 
 Run the server:
 
@@ -45,6 +36,21 @@ npm run dev
 ```
 
 Server runs by default on <http://localhost:3000>
+
+## 🐳 Deployment with Docker
+
+Specify environment variables, e.g.:
+
+```bash
+KEYCLOAK_REALM=apps
+KEYCLOAK_ISSUER_URL=https://auth.example.com
+KEYCLOAK_JWKS_URL=https://auth.example.com
+KEYCLOAK_AUDIENCE=example-audience
+ALLOWED_ORIGINS=https://demo1.example.com,https://demo2.example.com
+FILE_ACCESS_SECRET=secret
+```
+
+Use the provided [Dockerfile](./Dockerfile).
 
 ## 🧪 Testing
 

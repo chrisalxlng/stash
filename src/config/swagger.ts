@@ -38,7 +38,7 @@ export const setupSwagger = (
 		definition: {
 			openapi: "3.0.3",
 			info: {
-				title: "clhub-storage API",
+				title: "stash API",
 				version,
 				description: `File storage API (${version})`,
 			},

@@ -2,8 +2,8 @@ import { verify } from "jsonwebtoken";
 import type { FileAccessTokenPayload } from "../types/FileAccessTokenPayload";
 
 const getSecret = () => {
-	const secret = process.env.CLHUB_STORAGE_FILE_ACCESS_SECRET;
-	if (!secret) throw new Error("CLHUB_STORAGE_FILE_ACCESS_SECRET is not set");
+	const secret = process.env.FILE_ACCESS_SECRET;
+	if (!secret) throw new Error("FILE_ACCESS_SECRET is not set");
 	return secret;
 };
 

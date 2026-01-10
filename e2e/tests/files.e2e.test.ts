@@ -36,7 +36,7 @@ describe("/v1 endpoints", () => {
 	const baseUrl = `/v1/clients/${clientId}/files/${fileId}`;
 
 	beforeEach(() => {
-		vi.stubEnv("CLHUB_STORAGE_FILE_ACCESS_SECRET", MOCKED_ACCESS_TOKEN_SECRET);
+		vi.stubEnv("FILE_ACCESS_SECRET", MOCKED_ACCESS_TOKEN_SECRET);
 		tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "file-service-"));
 		const app = createApp(tempDirectory);
 

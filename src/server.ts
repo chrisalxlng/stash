@@ -7,5 +7,5 @@ const port = 3000;
 export const filesDirectory = path.resolve("./files");
 const app = createApp(filesDirectory);
 app.listen(port, () => {
-	console.log(`🚀 clhub-storage running at http://localhost:${port}`);
+	console.log(`🚀 stash running at http://localhost:${port}`);
 });

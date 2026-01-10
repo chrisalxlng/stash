@@ -8,8 +8,7 @@ import { createClientsRouter as v1CreateClientsRouter } from "./routes/v1/client
 export const createApp = (filesDirectory: string) => {
 	const app = express();
 
-	const allowedOrigins =
-		process.env.CLHUB_STORAGE_ALLOWED_ORIGINS?.split(",") ?? [];
+	const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") ?? [];
 
 	const corsMiddleware = cors({
 		origin: (origin, callback) => {
