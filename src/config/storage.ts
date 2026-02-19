@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import multer from "multer";
-import type { FileMetadata } from "../types/FileMetadata";
 
 export const createStorage = (filesDirectory: string) => {
 	if (!fs.existsSync(filesDirectory)) {
@@ -11,7 +10,7 @@ export const createStorage = (filesDirectory: string) => {
 	const storage = multer.diskStorage({
 		destination: (req, _file, cb) => {
 			const userId = req.auth?.sub;
-			const clientId = req.params.clientId;
+			const clientId = req.params.clientId as string;
 
 			if (!userId || !clientId) {
 				return cb(new Error("Missing user or client info"), "");
@@ -21,38 +20,17 @@ export const createStorage = (filesDirectory: string) => {
 			fs.mkdirSync(userClientDir, { recursive: true });
 			cb(null, userClientDir);
 		},
-		filename: (req, file, cb) => {
-			const userId = req.auth?.sub;
-			const clientId = req.params.clientId;
-			const fileId = req.params.fileId;
+		filename: (req, _, cb) => {
+			const fileId = req.params.fileId as string;
 
-			if (!userId || !clientId) {
-				return cb(new Error("Missing user or client info"), "");
-			}
-
-			const metaPath = path.join(
-				filesDirectory,
-				userId,
-				clientId,
-				`${fileId}.json`,
-			);
-
-			const allowTokenAccess = req.get("x-allow-token-access") === "true";
-
-			const metadata: FileMetadata = {
-				fileId,
-				originalName: file.originalname,
-				mimetype: file.mimetype,
-				uploadedAt: new Date().toISOString(),
-				allowTokenAccess,
-			};
-
-			fs.writeFileSync(metaPath, JSON.stringify(metadata, null, 2));
 			cb(null, fileId);
 		},
 	});
 
+	const maxFileSizeEnv = Number(process.env.MAX_FILE_SIZE_MB);
+	const maxFileSize = maxFileSizeEnv * 1_000_000;
+
 	return {
-		save: multer({ storage }),
+		save: multer({ storage, limits: { fileSize: maxFileSize } }),
 	};
 };

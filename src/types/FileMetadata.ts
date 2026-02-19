@@ -4,4 +4,5 @@ export type FileMetadata = {
 	mimetype: string;
 	uploadedAt: string;
 	allowTokenAccess: boolean;
+	expiresAt?: string | null;
 };

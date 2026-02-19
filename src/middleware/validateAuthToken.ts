@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import { throwError } from "../utils/errors";
+import { HttpError } from "../utils/HttpError";
 
 export const validateAuthToken = (
 	req: Request,
@@ -9,7 +9,7 @@ export const validateAuthToken = (
 	const userId = req.auth?.sub;
 
 	if (!userId) {
-		return throwError("MISSING_OR_INVALID_TOKEN");
+		throw new HttpError("MISSING_OR_INVALID_TOKEN");
 	}
 
 	next();

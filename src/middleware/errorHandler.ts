@@ -1,30 +1,38 @@
 import type { NextFunction, Request, Response } from "express";
-import { ERRORS } from "../utils/errors";
+import { MulterError } from "multer";
 import { HttpError } from "../utils/HttpError";
 
-const sendErrorResponse = (res: Response, code: keyof typeof ERRORS) => {
-	const { message, status } = ERRORS[code];
+const sendErrorResponse = (
+	res: Response,
+	{ code, message, status }: HttpError,
+) => {
 	return res.status(status).json({ message, code });
 };
 
 export const errorHandler = (
-	err: unknown,
+	error: unknown,
 	_req: Request,
 	res: Response,
 	_next: NextFunction,
 ) => {
-	console.error(err);
+	console.error(error);
 
-	if (err instanceof HttpError) {
-		return sendErrorResponse(res, err.code);
+	if (error instanceof HttpError) {
+		return sendErrorResponse(res, error);
 	}
 
-	if (typeof err === "object" && err !== null && "name" in err) {
-		const e = err as { name?: string };
-		if (e.name === "UnauthorizedError") {
-			return sendErrorResponse(res, "MISSING_OR_INVALID_TOKEN");
+	if (error instanceof MulterError) {
+		if (error.code === "LIMIT_FILE_SIZE") {
+			return sendErrorResponse(res, new HttpError("FILE_SIZE_EXCEEDED"));
 		}
 	}
 
-	return sendErrorResponse(res, "INTERNAL_SERVER_ERROR");
+	if (typeof error === "object" && error !== null && "name" in error) {
+		const e = error as { name?: string };
+		if (e.name === "UnauthorizedError") {
+			return sendErrorResponse(res, new HttpError("MISSING_OR_INVALID_TOKEN"));
+		}
+	}
+
+	return sendErrorResponse(res, new HttpError("INTERNAL_SERVER_ERROR"));
 };

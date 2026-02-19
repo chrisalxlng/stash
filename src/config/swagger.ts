@@ -54,6 +54,16 @@ export const setupSwagger = (
 						"Missing file in payload",
 						400,
 					),
+					NO_CLIENT_ID_PROVIDED: createErrorSchema(
+						"NO_CLIENT_ID_PROVIDED",
+						"Missing route parameter clientId",
+						400,
+					),
+					NO_FILE_ID_PROVIDED: createErrorSchema(
+						"NO_FILE_ID_PROVIDED",
+						"Missing route parameter fileId",
+						400,
+					),
 					MISSING_OR_INVALID_TOKEN: createErrorSchema(
 						"MISSING_OR_INVALID_TOKEN",
 						"Missing or invalid token",
@@ -63,6 +73,11 @@ export const setupSwagger = (
 						"NO_USER_INFO_IN_TOKEN",
 						"Missing user information in token",
 						401,
+					),
+					FILE_ACCESS_NOT_ALLOWED: createErrorSchema(
+						"FILE_ACCESS_NOT_ALLOWED",
+						"File cannot be accessed with the provided credentials or token",
+						403,
 					),
 					FILE_NOT_FOUND: createErrorSchema(
 						"FILE_NOT_FOUND",
@@ -74,10 +89,15 @@ export const setupSwagger = (
 						"File metadata not found",
 						404,
 					),
-					FILE_ACCESS_NOT_ALLOWED: createErrorSchema(
-						"FILE_ACCESS_NOT_ALLOWED",
-						"File cannot be accessed with the provided credentials or token",
-						403,
+					FILE_SIZE_EXCEEDED: createErrorSchema(
+						"FILE_SIZE_EXCEEDED",
+						"File size exceeded",
+						413,
+					),
+					FILE_LIMIT_EXCEEDED: createErrorSchema(
+						"FILE_LIMIT_EXCEEDED",
+						"File limit exceeded",
+						422,
 					),
 					INTERNAL_SERVER_ERROR: createErrorSchema(
 						"INTERNAL_SERVER_ERROR",

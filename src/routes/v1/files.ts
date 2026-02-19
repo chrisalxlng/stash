@@ -3,9 +3,13 @@ import path from "node:path";
 import { type Request, Router } from "express";
 import { createStorage } from "../../config/storage";
 import { validateAuthToken } from "../../middleware/validateAuthToken";
-import { throwError } from "../../utils/errors";
+import { validateFileLimit } from "../../middleware/validateFileLimit";
+import type { FileMetadata } from "../../types/FileMetadata";
 import { verifyFileAccessToken } from "../../utils/fileAccessToken";
+import { HttpError } from "../../utils/HttpError";
 import { readFileMetadata } from "../../utils/readFileMetadata";
+
+const HOURS_PER_DAY = 24;
 
 type AuthRequest<P extends Record<string, unknown> = Record<string, unknown>> =
 	Request<P> & { auth?: { sub?: string } };
@@ -61,24 +65,102 @@ export const createFilesRouter = (filesDirectory: string) => {
 	 *       201:
 	 *         description: File uploaded successfully
 	 *       400:
-	 *         description: Missing file in payload
+	 *         description: Invalid request (missing file or route parameters)
 	 *         content:
 	 *           application/json:
 	 *             schema:
-	 *               $ref: '#/components/schemas/NO_FILE_PROVIDED'
+	 *               oneOf:
+	 *                 - $ref: '#/components/schemas/NO_FILE_PROVIDED'
+	 *                 - $ref: '#/components/schemas/NO_CLIENT_ID_PROVIDED'
+	 *                 - $ref: '#/components/schemas/NO_FILE_ID_PROVIDED'
 	 *       401:
 	 *         description: Missing or invalid authentication token
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               $ref: '#/components/schemas/MISSING_OR_INVALID_TOKEN'
+	 *       413:
+	 *         description: Uploaded file exceeds the maximum allowed size
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               $ref: '#/components/schemas/FILE_SIZE_EXCEEDED'
+	 *       422:
+	 *         description: File upload limit exceeded
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               $ref: '#/components/schemas/FILE_LIMIT_EXCEEDED'
+	 *       500:
+	 *         description: Internal server error
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               $ref: '#/components/schemas/INTERNAL_SERVER_ERROR'
 	 */
 	filesRouter.post(
 		"/:fileId",
 		validateAuthToken,
+		validateFileLimit(filesDirectory),
 		storage.save.single("file"),
 		(req, res) => {
-			if (!req.file) return throwError("NO_FILE_PROVIDED");
+			const { auth } = req ?? {};
+			const userId = auth?.sub;
+			const file = req.file;
+			const clientId = req.params.clientId as string;
+			const fileId = req.params.fileId as string;
+
+			if (!file) throw new HttpError("NO_FILE_PROVIDED");
+
+			if (!clientId) {
+				throw new HttpError("NO_CLIENT_ID_PROVIDED");
+			}
+
+			if (!fileId) {
+				throw new HttpError("NO_FILE_ID_PROVIDED");
+			}
+
+			if (!auth || !userId) {
+				throw new HttpError("MISSING_OR_INVALID_TOKEN");
+			}
+
+			const isDemo = auth.is_demo ?? false;
+
+			const metaPath = path.join(
+				filesDirectory,
+				userId,
+				clientId,
+				`${fileId}.json`,
+			);
+
+			const allowTokenAccess = req.get("x-allow-token-access") === "true";
+
+			let expiresAt: string | null = null;
+
+			if (isDemo) {
+				const expirationHoursEnv = Number(
+					process.env.DEMO_FILE_EXPIRATION_HOURS,
+				);
+				const expirationHours = Number.isFinite(expirationHoursEnv)
+					? expirationHoursEnv
+					: HOURS_PER_DAY;
+
+				const now = new Date();
+				const MS_DAY = expirationHours * 60 * 60 * 1000;
+				const expiresDate = new Date(now.getTime() + MS_DAY);
+				expiresAt = expiresDate.toISOString().replace(/\.\d{3}Z$/, "Z");
+			}
+
+			const metadata: FileMetadata = {
+				fileId,
+				originalName: file.originalname,
+				mimetype: file.mimetype,
+				uploadedAt: new Date().toISOString(),
+				allowTokenAccess,
+				expiresAt,
+			};
+
+			fs.writeFileSync(metaPath, JSON.stringify(metadata, null, 2));
 
 			res.sendStatus(201);
 		},
@@ -161,7 +243,7 @@ export const createFilesRouter = (filesDirectory: string) => {
 			}
 
 			if (!ownerUserId) {
-				return throwError("FILE_ACCESS_NOT_ALLOWED");
+				throw new HttpError("FILE_ACCESS_NOT_ALLOWED");
 			}
 
 			const baseDir = path.join(filesDirectory, ownerUserId, clientId);
@@ -169,13 +251,13 @@ export const createFilesRouter = (filesDirectory: string) => {
 			const metaPath = path.join(baseDir, `${fileId}.json`);
 
 			if (!fs.existsSync(filePath)) {
-				return throwError("FILE_NOT_FOUND");
+				throw new HttpError("FILE_NOT_FOUND");
 			}
 
 			const metadata = readFileMetadata(metaPath);
 
 			if (!metadata.allowTokenAccess && authUserId !== ownerUserId) {
-				return throwError("FILE_ACCESS_NOT_ALLOWED");
+				throw new HttpError("FILE_ACCESS_NOT_ALLOWED");
 			}
 
 			return res.sendFile(filePath);
@@ -227,7 +309,7 @@ export const createFilesRouter = (filesDirectory: string) => {
 		"/:fileId",
 		(req: AuthRequest<{ clientId: string; fileId: string }>, res) => {
 			const userId = req.auth?.sub;
-			if (!userId) return throwError("NO_USER_INFO_IN_TOKEN");
+			if (!userId) throw new HttpError("NO_USER_INFO_IN_TOKEN");
 
 			const { clientId, fileId } = req.params;
 			const filePath = path.join(filesDirectory, userId, clientId, fileId);
@@ -238,7 +320,7 @@ export const createFilesRouter = (filesDirectory: string) => {
 				`${fileId}.json`,
 			);
 
-			if (!fs.existsSync(filePath)) return throwError("FILE_NOT_FOUND");
+			if (!fs.existsSync(filePath)) throw new HttpError("FILE_NOT_FOUND");
 
 			try {
 				fs.unlinkSync(filePath);
@@ -249,7 +331,7 @@ export const createFilesRouter = (filesDirectory: string) => {
 
 				return res.sendStatus(204);
 			} catch {
-				return throwError("INTERNAL_SERVER_ERROR");
+				throw new HttpError("INTERNAL_SERVER_ERROR");
 			}
 		},
 	);
@@ -292,19 +374,19 @@ export const createFilesRouter = (filesDirectory: string) => {
 	 */
 	filesRouter.delete("/", (req: AuthRequest<{ clientId: string }>, res) => {
 		const userId = req.auth?.sub;
-		if (!userId) return throwError("NO_USER_INFO_IN_TOKEN");
+		if (!userId) throw new HttpError("NO_USER_INFO_IN_TOKEN");
 
 		const { clientId } = req.params;
 		const clientDir = path.join(filesDirectory, userId, clientId);
 
-		if (!fs.existsSync(clientDir)) return throwError("FILE_NOT_FOUND");
+		if (!fs.existsSync(clientDir)) throw new HttpError("FILE_NOT_FOUND");
 
 		try {
 			fs.rmSync(clientDir, { recursive: true, force: true });
 
 			return res.sendStatus(204);
 		} catch {
-			return throwError("INTERNAL_SERVER_ERROR");
+			throw new HttpError("INTERNAL_SERVER_ERROR");
 		}
 	});
 
